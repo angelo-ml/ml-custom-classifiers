@@ -1,5 +1,5 @@
 # Machine Learning Custom Classifiers
-This is a library containing custom implementations of some popular machine learning classifiers. Currently it includes the logistic regression and decision tree classifiers. More will be added soon.
+This library contains custom implementations of some popular machine learning classifiers. Currently it includes the logistic regression and decision tree classifiers. More will be added soon.
 
 ## Example Usage
 Assuming that we have loaded the data X_train, y_train, X_test, y_test and X_predict.

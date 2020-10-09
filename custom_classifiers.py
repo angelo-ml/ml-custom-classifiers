@@ -10,8 +10,6 @@
 import pandas as pd
 import numpy as np
 import math
-import scipy.cluster as sc
-import matplotlib.pyplot as plt
 from random import shuffle
 
 
@@ -310,5 +308,56 @@ class DecisionTree:
 			if y_predict[i] != y[i]:
 				false_predictions = false_predictions + 1
 		
+		return 1-( false_predictions/len(y) )
+
+	
+	
+###############################################
+## ======= Random Forrest Classifier ======= ##
+###############################################
+
+class RandomForrest:
+	def __init__(self, n_estimators=100, max_features=None, max_depth=None, min_samples_split=2):
+		self.n_estimators = n_estimators
+		self.forest = [0] * n_estimators
+		for i in range(n_estimators):
+			self.forest[i] = DecisionTree(max_depth, min_samples_split)
+		self.max_features = max_features
+		self.forest_features = [0] * n_estimators
+		
+	def fit(self, X, y):
+		X = np.array(X)
+		y = np.array(y)
+		
+		n_features = np.size(X,1)
+		if self.max_features == None:
+			self.max_features = round((n_features)**(1/2))
+			
+		features = list(range(n_features))
+		for i in range(self.n_estimators):
+			self.forest_features[i] = list(np.random.choice(features,[1,self.max_features],replace=False)[0])
+			self.forest[i].fit(X[:,self.forest_features[i]],y)
+			
+	def predict(self, X):
+		predictions = np.zeros(X.shape[0])
+		estimators_predictions = np.zeros([X.shape[0], self.n_estimators])
+		for i in range(self.n_estimators):
+			estimators_predictions[:,i] = self.forest[i].predict(X[:,self.forest_features[i]])
+		
+		for i in range(X.shape[0]):
+			p = list(estimators_predictions[i,:])
+			counts = np.bincount(p)
+			predictions[i] = np.argmax(counts)
+			
+		return predictions
+	
+	# return the accuracy of the classifier given a test-set and its labels
+	def score(self, X, y):
+		y_predict = self.predict(X)
+		
+		false_predictions = 0
+		for i in range(len(y_predict)):
+			if y_predict[i] != y[i]:
+				false_predictions = false_predictions + 1
 		
 		return 1-( false_predictions/len(y) )

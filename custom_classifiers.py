@@ -317,33 +317,43 @@ class DecisionTree:
 ###############################################
 
 class RandomForrest:
+	# initialize random forrest object
 	def __init__(self, n_estimators=100, max_features=None, max_depth=None, min_samples_split=2):
 		self.n_estimators = n_estimators
 		self.forest = [0] * n_estimators
+		# initialize the decision trees that will form the forrest
 		for i in range(n_estimators):
 			self.forest[i] = DecisionTree(max_depth, min_samples_split)
 		self.max_features = max_features
 		self.forest_features = [0] * n_estimators
-		
+	
+	# fit the random forrest object using the decision tree classifier
 	def fit(self, X, y):
 		X = np.array(X)
 		y = np.array(y)
 		
+		# determine which features will be used for each decision tree
 		n_features = np.size(X,1)
 		if self.max_features == None:
 			self.max_features = round((n_features)**(1/2))
-			
+		
 		features = list(range(n_features))
+		
+		# fit each decision tree using the randomly selected features
 		for i in range(self.n_estimators):
 			self.forest_features[i] = list(np.random.choice(features,[1,self.max_features],replace=False)[0])
 			self.forest[i].fit(X[:,self.forest_features[i]],y)
-			
+	
+	# predict the results from each tree and then choose the most common prediction
 	def predict(self, X):
 		predictions = np.zeros(X.shape[0])
 		estimators_predictions = np.zeros([X.shape[0], self.n_estimators])
+		
+		# store the results from each decision tree classifier
 		for i in range(self.n_estimators):
 			estimators_predictions[:,i] = self.forest[i].predict(X[:,self.forest_features[i]])
 		
+		# select the most common prediction of the decision trees for each row of the input vector
 		for i in range(X.shape[0]):
 			p = list(estimators_predictions[i,:])
 			counts = np.bincount(p)
